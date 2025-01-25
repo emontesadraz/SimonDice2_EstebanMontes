@@ -27,7 +27,7 @@ object Datos {
 
 }
 /*
-    Enum class que define los colores que se van a utilizar en la aplicación.
+    Enum class que define estados de la aplicación.
  */
 enum class estados (val start_activo: Boolean, val boton_activo: Boolean, val colorearSecuencia: Boolean) {
     ESPERANDO(start_activo = true, boton_activo = false, colorearSecuencia = false),
