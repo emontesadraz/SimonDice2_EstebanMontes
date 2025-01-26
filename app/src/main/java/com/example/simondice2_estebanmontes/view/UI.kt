@@ -8,9 +8,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.simondice2_estebanmontes.model.Colores
+import com.example.simondice2_estebanmontes.modelview.MyViewModel
 
 @Composable
-fun crearBotones() {
+fun App(viewModel: MyViewModel) {
+    Column {
+        crearBotones(viewModel)
+    }
+}
+
+@Composable
+fun crearBotones(viewModel: MyViewModel) {
     Column {
         for (i in Colores.values().indices step 2) {
             Row {
@@ -18,7 +26,7 @@ fun crearBotones() {
                     if (i + j < Colores.values().size) {
                         val color = Colores.values()[i + j]
                         Button(
-                            onClick = { /* Acción del botón */ },
+                            onClick = { viewModel.actualizarNumero(color.numColor) },
                             modifier = Modifier
                                 .padding(16.dp)
                                 .size(100.dp)
@@ -36,5 +44,6 @@ fun crearBotones() {
 @Composable
 @Preview
 fun PreviewBotones() {
-    crearBotones()
+    val viewModel = MyViewModel()
+    crearBotones(viewModel)
 }

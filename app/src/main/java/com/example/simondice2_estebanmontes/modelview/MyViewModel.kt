@@ -16,6 +16,21 @@ class MyViewModel : ViewModel() {
     val estadoLiveData: MutableLiveData<estados> = MutableLiveData(estados.ESPERANDO)
 
     /**
+     * Inicialización de la secuencia de la máquina
+     */
+    init {
+        inicializarSecuenciaMaquina()
+    }
+
+    /**
+     * Función para inicializar la secuencia de la máquina
+     */
+    private fun inicializarSecuenciaMaquina() {
+        Datos.secuenciaMaquina.clear()
+        crearNumerosRandom()
+    }
+
+    /**
      * Función para aumentar la ronda
      */
     private fun aumentarRonda() {
