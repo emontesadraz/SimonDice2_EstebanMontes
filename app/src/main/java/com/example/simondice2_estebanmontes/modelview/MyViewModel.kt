@@ -9,7 +9,7 @@ import com.example.simondice2_estebanmontes.model.estados
 /**
  * Clase que se encarga de almacenar los datos de la aplicación junto con los estados de la misma.
  */
-class MyViewModel: ViewModel() {
+class MyViewModel : ViewModel() {
     /**
      * LiveData para el estado de la aplicación
      */
@@ -25,7 +25,7 @@ class MyViewModel: ViewModel() {
     /**
      * Función para generar la secuencia de la máquina y cambiar el estado a GENERANDO
      */
-    fun crearNumerosRandom(){
+    fun crearNumerosRandom() {
         Log.d("MyViewModel", "crearNumerosRandom")
         Datos.secuenciaMaquina.add((0..3).random())
         estadoLiveData.value = estados.GENERANDO
@@ -45,16 +45,22 @@ class MyViewModel: ViewModel() {
     /**
      * Función para comprobar si la secuencia del jugador es correcta
      */
-    fun comprobarSecuencia () {
+    fun comprobarSecuencia() {
         Log.d("MyViewModel", "comprobarSecuencia")
-        if (Datos.secuenciaJugador.size <= Datos.secuenciaMaquina.size) {
-            if (Datos.secuenciaJugador == Datos.secuenciaMaquina) {
-                Log.d("MyViewModel", "Secuencia correcta")
-                aumentarRonda()
-                Datos.secuenciaJugador.clear()
-                Datos.isPrinted.value = false
-                estadoLiveData.value = estados.ESPERANDO
-            }
+        if (Datos.secuenciaJugador == Datos.secuenciaMaquina) {
+            Log.d("MyViewModel", "secuencia correcta")
+            aumentarRonda()
+            Datos.score += 1
+            Datos.actualizarRecord()
+            Datos.secuenciaJugador.clear()
+            crearNumerosRandom()
+            estadoLiveData.value = estados.ESPERANDO
+        } else {
+            Log.d("MyViewModel", "secuencia incorrecta")
+            Datos.score = 0
+            Datos.secuenciaJugador.clear()
+            Datos.secuenciaMaquina.clear()
+            estadoLiveData.value = estados.ESPERANDO
         }
     }
 }
