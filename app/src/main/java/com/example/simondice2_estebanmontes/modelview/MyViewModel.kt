@@ -1,114 +1,100 @@
 package com.example.simondice2_estebanmontes.modelview
 
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.simondice2_estebanmontes.model.Datos
 import com.example.simondice2_estebanmontes.model.estados
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-/**
- * Clase que se encarga de almacenar los datos de la aplicación junto con los estados de la misma.
- */
 class MyViewModel : ViewModel() {
-    /**
-     * LiveData para el estado de la aplicación
-     */
-    val estadoLiveData: MutableLiveData<estados> = MutableLiveData(estados.ESPERANDO)
 
-    /**
-     * LiveData para guardar el record del usuario
-     */
-    val record: MutableLiveData<Int> = MutableLiveData(Datos.record)
+    private val _estado = MutableStateFlow(estados.ESPERANDO)
+    val estado: StateFlow<estados> = _estado
 
-    /**
-     * LiveData para guardar la puntuación del usuario
-     */
-    val score: MutableLiveData<Int> = MutableLiveData(Datos.score)
+    private val _score = MutableStateFlow(0)
+    val score: StateFlow<Int> = _score
 
-    /**
-     * LiveData para guardar la ronda actual
-     */
-    val ronda: MutableLiveData<Int> = MutableLiveData(Datos.ronda)
+    private val _ronda = MutableStateFlow(0)
+    val ronda: StateFlow<Int> = _ronda
 
-    /**
-     * Función para aumentar la ronda
-     */
-    private fun aumentarRonda() {
-        Datos.ronda += 1
-    }
+    private val _record = MutableStateFlow(0)
+    val record: StateFlow<Int> = _record
 
-    /**
-     * Función para generar la secuencia de la máquina y cambiar el estado a GENERANDO
-     */
-    fun crearNumerosRandom() {
-        Log.d("MyViewModel", "crearNumerosRandom")
-        Datos.secuenciaMaquina.add((0..3).random())
-        mostrarSecuencia()
-    }
-
-    /**
-     * Función para actualizar la secuencia del jugador y cambiar el estado a JUGANDO
-     * @param numero El número a añadir a la secuencia del jugador
-     */
-    fun actualizarNumero(numero: Int) {
-        Datos.secuenciaJugador.add(numero)
-        val index = Datos.secuenciaJugador.size - 1
-
-        if (Datos.secuenciaJugador[index] != Datos.secuenciaMaquina[index]) {
-            // Secuencia incorrecta
-            finalizarJuego()
-        } else if (Datos.secuenciaJugador.size == Datos.secuenciaMaquina.size) {
-            // Secuencia completa y correcta
-            Datos.secuenciaJugador.clear()
-            crearNumerosRandom() // Genera una nueva ronda
-            estadoLiveData.value = estados.COLOREANDO
-        }
-    }
-
-
-    /**
-     * Función para comprobar si la secuencia del jugador es correcta
-     */
-    fun mostrarSecuencia() {
-        estadoLiveData.value = estados.COLOREANDO
-    }
-
-    /**
-     * Función para comprobar si la secuencia del jugador es correcta
-     */
-    fun comprobarSecuencia() {
-        if (Datos.secuenciaJugador == Datos.secuenciaMaquina) {
-            aumentarRonda()
-            Datos.score += 1
-            Datos.actualizarRecord()
-            Datos.secuenciaJugador.clear()
-            crearNumerosRandom()
-            estadoLiveData.value = estados.COLOREANDO
-        } else {
-            finalizarJuego()
-        }
-    }
-
-    /**
-     * Función para iniciar el juego
-     */
     fun iniciarJuego() {
-        Datos.score = 0
-        Datos.secuenciaJugador.clear()
-        Datos.secuenciaMaquina.clear()
-        estadoLiveData.value = estados.GENERANDO
-        crearNumerosRandom()
+        viewModelScope.launch {
+            Datos.reset()
+            _score.value = Datos.score
+            _ronda.value = Datos.ronda
+
+            // Genera la secuencia inicial de la máquina
+            crearNumerosRandom()
+
+            // Cambia al estado COLOREANDO para mostrar la secuencia
+            _estado.value = estados.COLOREANDO
+        }
     }
 
+    fun actualizarNumero(num: Int) {
+        viewModelScope.launch {
+            Datos.secuenciaJugador.add(num)
 
-    /**
-     * Función para finalizar el juego
-     */
-    fun finalizarJuego(){
-        Datos.score = 0
-        Datos.secuenciaJugador.clear()
-        Datos.secuenciaMaquina.clear()
-        estadoLiveData.value = estados.PERDIDO
+            if (Datos.secuenciaJugador == Datos.secuenciaMaquina.take(Datos.secuenciaJugador.size)) {
+                if (Datos.secuenciaJugador.size == Datos.secuenciaMaquina.size) {
+                    // Secuencia completa y correcta
+                    Datos.score += 1
+                    _score.value = Datos.score
+
+                    Datos.ronda += 1
+                    _ronda.value = Datos.ronda
+
+                    if (Datos.score > Datos.record) {
+                        Datos.record = Datos.score
+                        _record.value = Datos.record
+                    }
+
+                    // Limpia la secuencia del jugador y añade un nuevo número a la secuencia de la máquina
+                    Datos.secuenciaJugador.clear()
+                    crearNumerosRandom()
+
+                    // Cambia al estado COLOREANDO para mostrar la nueva secuencia
+                    _estado.value = estados.COLOREANDO
+                }
+            } else {
+                // Secuencia incorrecta
+                _estado.value = estados.PERDIDO
+            }
+        }
     }
 
+    private fun crearNumerosRandom() {
+        // Añade un nuevo número aleatorio a la secuencia de la máquina
+        Datos.secuenciaMaquina.add((0..3).random())
+    }
+
+    fun resetGame() {
+        viewModelScope.launch {
+            Datos.reset()
+            _score.value = Datos.score
+            _ronda.value = Datos.ronda
+            _estado.value = estados.ESPERANDO
+        }
+    }
+
+    fun reproducirSecuenciaMaquina(onColorChange: (Int) -> Unit) {
+        viewModelScope.launch {
+            // Reproduce la secuencia de la máquina paso a paso
+            Datos.secuenciaMaquina.forEach { colorIndex ->
+                onColorChange(colorIndex) // Cambia el color mostrado
+                delay(500) // Muestra el color durante 500ms
+                onColorChange(-1) // Vuelve al color predeterminado
+                delay(250) // Breve pausa entre colores
+            }
+            _estado.value =
+                estados.JUGANDO // Cambia al estado JUGANDO después de mostrar la secuencia
+        }
+    }
 }
+

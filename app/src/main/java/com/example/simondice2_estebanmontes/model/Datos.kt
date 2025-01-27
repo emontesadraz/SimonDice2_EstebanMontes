@@ -28,14 +28,18 @@ object Datos {
     // Variable que almacena el color actual
     val isPrinted = mutableStateOf(false)
 
+
     /**
-     * Función que actualiza el record del usuario si la puntuación actual es mayor que el record.
+     * Función que se encarga de reiniciar los datos de la aplicación.
      */
-    fun actualizarRecord() {
-        if (Datos.score > Datos.record) {
-            Datos.record = Datos.score
-        }
+    fun reset() {
+        secuenciaMaquina.clear()  // Vacía la secuencia de la máquina
+        secuenciaJugador.clear()  // Vacía la secuencia del jugador
+        score = 0                 // Reinicia la puntuación
+        ronda = 0                 // Reinicia la ronda
+        // Nota: No reiniciamos el récord, ya que debería persistir
     }
+
 }
 
 /**

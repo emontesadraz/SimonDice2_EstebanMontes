@@ -1,5 +1,6 @@
 package com.example.simondice2_estebanmontes.view
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -7,6 +8,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -30,34 +32,29 @@ import com.example.simondice2_estebanmontes.modelview.MyViewModel
  */
 @Composable
 fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
-    val estado by viewModel.estadoLiveData.observeAsState(estados.ESPERANDO)
+    val estado by viewModel.estado.collectAsState()
     val secuenciaMaquina = Datos.secuenciaMaquina
     var backgroundColor by remember { mutableStateOf(Color.White) }
 
     // Cambiar el fondo según la secuencia de la máquina
     LaunchedEffect(estado) {
         if (estado == estados.COLOREANDO) {
-            for (colorIndex in secuenciaMaquina) {
-                val color = when (colorIndex) {
+            viewModel.reproducirSecuenciaMaquina { colorIndex ->
+                backgroundColor = when (colorIndex) {
                     0 -> Colores.ROJO.color
                     1 -> Colores.VERDE.color
                     2 -> Colores.AZUL.color
                     3 -> Colores.AMARILLO.color
                     else -> Color.White
                 }
-                backgroundColor = color
-                delay(500) // Tiempo de visualización de cada color
-                backgroundColor = Color.White
-                delay(250) // Breve pausa entre colores
             }
-            viewModel.estadoLiveData.value = estados.JUGANDO // Cambia al estado de JUGANDO después de la secuencia
         }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor) // Aplica el color de fondo dinámico
+            .background(backgroundColor)
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
@@ -69,14 +66,12 @@ fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
             textoPuntuacion(viewModel)
             textoRonda(viewModel)
 
-            val mensaje = remember(estado) {
-                when (estado) {
-                    estados.ESPERANDO -> "Pulsa Start para comenzar"
-                    estados.COLOREANDO -> "Observa la secuencia"
-                    estados.JUGANDO -> "Tu turno: sigue la secuencia"
-                    estados.PERDIDO -> "Perdiste. Pulsa Start para intentarlo de nuevo"
-                    else -> ""
-                }
+            val mensaje = when (estado) {
+                estados.ESPERANDO -> "Pulsa Start para comenzar"
+                estados.COLOREANDO -> "Observa la secuencia"
+                estados.JUGANDO -> "Tu turno: sigue la secuencia"
+                estados.PERDIDO -> "Perdiste. Pulsa Start para intentarlo de nuevo"
+                else -> ""
             }
 
             Text(text = mensaje, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
@@ -89,6 +84,7 @@ fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
         }
     }
 }
+
 
 
 
@@ -148,8 +144,8 @@ fun BotonStart(viewModel: MyViewModel) {
  * @param viewModel instancia de MyViewModel
  */
 @Composable
-fun textoPuntuacion(viewModel: MyViewModel){
-    val puntuacion by viewModel.score.observeAsState()
+fun textoPuntuacion(viewModel: MyViewModel) {
+    val puntuacion by viewModel.score.collectAsState()
     Text(
         text = "Puntuacion: $puntuacion",
         fontSize = 20.sp
@@ -161,8 +157,8 @@ fun textoPuntuacion(viewModel: MyViewModel){
  * @param viewModel instancia de MyViewModel
  */
 @Composable
-fun textoRonda(viewModel: MyViewModel){
-    val ronda by viewModel.ronda.observeAsState()
+fun textoRonda(viewModel: MyViewModel) {
+    val ronda by viewModel.ronda.collectAsState()
     Text(
         text = "Ronda: $ronda",
         fontSize = 20.sp
@@ -170,8 +166,8 @@ fun textoRonda(viewModel: MyViewModel){
 }
 
 @Composable
-fun textoRecord(viewModel: MyViewModel){
-    val record by viewModel.record.observeAsState()
+fun textoRecord(viewModel: MyViewModel) {
+    val record by viewModel.record.collectAsState()
     Text(
         text = "Record: $record",
         fontSize = 20.sp
