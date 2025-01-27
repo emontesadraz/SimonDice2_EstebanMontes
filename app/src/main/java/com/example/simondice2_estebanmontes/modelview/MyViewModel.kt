@@ -108,7 +108,7 @@ class MyViewModel : ViewModel() {
         Datos.score = 0
         Datos.secuenciaJugador.clear()
         Datos.secuenciaMaquina.clear()
-        estadoLiveData.value = estados.ESPERANDO
+        estadoLiveData.value = estados.PERDIDO
     }
 
 }

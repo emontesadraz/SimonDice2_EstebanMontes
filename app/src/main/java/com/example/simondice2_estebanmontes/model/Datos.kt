@@ -49,4 +49,5 @@ enum class estados (val start_activo: Boolean, val boton_activo: Boolean, val co
     GENERANDO(start_activo = false, boton_activo = true, colorearSecuencia = true),
     JUGANDO(start_activo = false, boton_activo = true, colorearSecuencia = false),
     COLOREANDO(start_activo = false, boton_activo = false, colorearSecuencia = true),
+    PERDIDO(start_activo = true, boton_activo = false, colorearSecuencia = false),
 }

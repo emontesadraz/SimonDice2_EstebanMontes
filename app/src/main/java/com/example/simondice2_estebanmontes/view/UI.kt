@@ -32,24 +32,32 @@ import com.example.simondice2_estebanmontes.modelview.MyViewModel
 fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
     val estado by viewModel.estadoLiveData.observeAsState(estados.ESPERANDO)
     val secuenciaMaquina = Datos.secuenciaMaquina
-    var currentColorIndex by remember { mutableStateOf(-1) }
+    var backgroundColor by remember { mutableStateOf(Color.White) }
 
+    // Cambiar el fondo según la secuencia de la máquina
     LaunchedEffect(estado) {
         if (estado == estados.COLOREANDO) {
-            for (index in secuenciaMaquina.indices) {
-                currentColorIndex = secuenciaMaquina[index]
-                delay(500) // Muestra cada color durante 500ms
-                currentColorIndex = -1 // Pausa entre colores
-                delay(250)
+            for (colorIndex in secuenciaMaquina) {
+                val color = when (colorIndex) {
+                    0 -> Colores.ROJO.color
+                    1 -> Colores.VERDE.color
+                    2 -> Colores.AZUL.color
+                    3 -> Colores.AMARILLO.color
+                    else -> Color.White
+                }
+                backgroundColor = color
+                delay(500) // Tiempo de visualización de cada color
+                backgroundColor = Color.White
+                delay(250) // Breve pausa entre colores
             }
-            viewModel.estadoLiveData.value = estados.JUGANDO // Pasamos al estado JUGANDO
+            viewModel.estadoLiveData.value = estados.JUGANDO // Cambia al estado de JUGANDO después de la secuencia
         }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(backgroundColor) // Aplica el color de fondo dinámico
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
@@ -60,14 +68,28 @@ fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
             textoRecord(viewModel)
             textoPuntuacion(viewModel)
             textoRonda(viewModel)
-            if (estado == estados.ESPERANDO) {
+
+            val mensaje = remember(estado) {
+                when (estado) {
+                    estados.ESPERANDO -> "Pulsa Start para comenzar"
+                    estados.COLOREANDO -> "Observa la secuencia"
+                    estados.JUGANDO -> "Tu turno: sigue la secuencia"
+                    estados.PERDIDO -> "Perdiste. Pulsa Start para intentarlo de nuevo"
+                    else -> ""
+                }
+            }
+
+            Text(text = mensaje, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+
+            if (estado == estados.ESPERANDO || estado == estados.PERDIDO) {
                 BotonStart(viewModel)
             } else {
-                botonColores(viewModel, currentColorIndex)
+                botonColores(viewModel, -1)
             }
         }
     }
 }
+
 
 
 @Composable
