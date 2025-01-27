@@ -16,19 +16,19 @@ class MyViewModel : ViewModel() {
     val estadoLiveData: MutableLiveData<estados> = MutableLiveData(estados.ESPERANDO)
 
     /**
-     * Inicialización de la secuencia de la máquina
+     * LiveData para guardar el record del usuario
      */
-    init {
-        inicializarSecuenciaMaquina()
-    }
+    val record: MutableLiveData<Int> = MutableLiveData(Datos.record)
 
     /**
-     * Función para inicializar la secuencia de la máquina
+     * LiveData para guardar la puntuación del usuario
      */
-    private fun inicializarSecuenciaMaquina() {
-        Datos.secuenciaMaquina.clear()
-        crearNumerosRandom()
-    }
+    val score: MutableLiveData<Int> = MutableLiveData(Datos.score)
+
+    /**
+     * LiveData para guardar la ronda actual
+     */
+    val ronda: MutableLiveData<Int> = MutableLiveData(Datos.ronda)
 
     /**
      * Función para aumentar la ronda
@@ -43,8 +43,7 @@ class MyViewModel : ViewModel() {
     fun crearNumerosRandom() {
         Log.d("MyViewModel", "crearNumerosRandom")
         Datos.secuenciaMaquina.add((0..3).random())
-        estadoLiveData.value = estados.GENERANDO
-
+        mostrarSecuencia()
     }
 
     /**
@@ -52,30 +51,64 @@ class MyViewModel : ViewModel() {
      * @param numero El número a añadir a la secuencia del jugador
      */
     fun actualizarNumero(numero: Int) {
-        Log.d("MyViewModel", "actualizarNumero")
         Datos.secuenciaJugador.add(numero)
-        estadoLiveData.value = estados.JUGANDO
+        val index = Datos.secuenciaJugador.size - 1
+
+        if (Datos.secuenciaJugador[index] != Datos.secuenciaMaquina[index]) {
+            // Secuencia incorrecta
+            finalizarJuego()
+        } else if (Datos.secuenciaJugador.size == Datos.secuenciaMaquina.size) {
+            // Secuencia completa y correcta
+            Datos.secuenciaJugador.clear()
+            crearNumerosRandom() // Genera una nueva ronda
+            estadoLiveData.value = estados.COLOREANDO
+        }
+    }
+
+
+    /**
+     * Función para comprobar si la secuencia del jugador es correcta
+     */
+    fun mostrarSecuencia() {
+        estadoLiveData.value = estados.COLOREANDO
     }
 
     /**
      * Función para comprobar si la secuencia del jugador es correcta
      */
     fun comprobarSecuencia() {
-        Log.d("MyViewModel", "comprobarSecuencia")
         if (Datos.secuenciaJugador == Datos.secuenciaMaquina) {
-            Log.d("MyViewModel", "secuencia correcta")
             aumentarRonda()
             Datos.score += 1
             Datos.actualizarRecord()
             Datos.secuenciaJugador.clear()
             crearNumerosRandom()
-            estadoLiveData.value = estados.ESPERANDO
+            estadoLiveData.value = estados.COLOREANDO
         } else {
-            Log.d("MyViewModel", "secuencia incorrecta")
-            Datos.score = 0
-            Datos.secuenciaJugador.clear()
-            Datos.secuenciaMaquina.clear()
-            estadoLiveData.value = estados.ESPERANDO
+            finalizarJuego()
         }
     }
+
+    /**
+     * Función para iniciar el juego
+     */
+    fun iniciarJuego() {
+        Datos.score = 0
+        Datos.secuenciaJugador.clear()
+        Datos.secuenciaMaquina.clear()
+        estadoLiveData.value = estados.GENERANDO
+        crearNumerosRandom()
+    }
+
+
+    /**
+     * Función para finalizar el juego
+     */
+    fun finalizarJuego(){
+        Datos.score = 0
+        Datos.secuenciaJugador.clear()
+        Datos.secuenciaMaquina.clear()
+        estadoLiveData.value = estados.ESPERANDO
+    }
+
 }

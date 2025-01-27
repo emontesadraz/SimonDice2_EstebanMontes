@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.simondice2_estebanmontes.ui.theme.SimonDice2_EstebanMontesTheme
 import com.example.simondice2_estebanmontes.view.App
 import com.example.simondice2_estebanmontes.modelview.MyViewModel
-import com.example.simondice2_estebanmontes.view.crearBotones
+import com.example.simondice2_estebanmontes.view.botonColores
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MyViewModel by viewModels()
@@ -44,7 +44,7 @@ fun MainScreen(viewModel: MyViewModel) {
 @Composable
 fun App(viewModel: MyViewModel, paddingValues: PaddingValues) {
     Column(modifier = Modifier.padding(paddingValues)) {
-        crearBotones(viewModel)
+        botonColores(viewModel, currentColorIndex = -1)
     }
 }
 
