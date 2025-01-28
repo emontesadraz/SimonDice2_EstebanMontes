@@ -9,7 +9,10 @@ El juego es una excelente manera de mejorar la memoria y la concentración, y pu
 
 ## FUNCIONAMIENTO
 Este proyecto está hecho en Android Studio con el lenguaje ```Kotlin```. Utiliza un patrón MVVM (Model View ViewModel)
-![Imagen1](img/Captura%20de%20pantalla%202025-01-28%20a%20las%201.44.51.png) Este estilo de arquitectura hace que se vea más ordenado y mucho más cómodo a la hora de manipular el código.
+
+![Imagen1](img/Captura%20de%20pantalla%202025-01-28%20a%20las%201.44.51.png) 
+
+Este estilo de arquitectura hace que se vea más ordenado y mucho más cómodo a la hora de manipular el código.
 Para explicarlo más en detalle:
 
 **¿De qué se trata el modelo MVVM?**
