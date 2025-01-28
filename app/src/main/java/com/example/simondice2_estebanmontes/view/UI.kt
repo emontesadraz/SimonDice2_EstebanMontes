@@ -2,6 +2,7 @@ package com.example.simondice2_estebanmontes.view
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -106,7 +107,8 @@ fun botonColores(viewModel: MyViewModel, currentColorIndex: Int) {
                         onClick = { viewModel.actualizarNumero(color.numColor) },
                         modifier = Modifier
                             .padding(16.dp)
-                            .size(100.dp),
+                            .size(100.dp)
+                            .border(2.dp,Color.Black),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isHighlighted) color.color.copy(alpha = 0.5f) else color.color
                         ),
